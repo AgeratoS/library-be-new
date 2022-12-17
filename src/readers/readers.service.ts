@@ -40,11 +40,17 @@ export class ReadersService {
   }
 
   findOne(id: number) {
-    return this.readerRepository.findBy({ id });
+    return this.readerRepository.findOneBy({ id });
   }
 
-  update(id: number, updateReaderDto: UpdateReaderDto) {
-    return `This action updates a #${id} reader`;
+  async update(id: number, updateReaderDto: UpdateReaderDto) {
+    const reader = await this.readerRepository.findOneBy({ id });
+    reader.firstName = updateReaderDto.firstName;
+    reader.lastName = updateReaderDto.lastName;
+    reader.middleName = updateReaderDto.middleName;
+    reader.age = updateReaderDto.age;
+    reader.gender = updateReaderDto.gender;
+    return this.readerRepository.save(reader);
   }
 
   remove(id: number) {

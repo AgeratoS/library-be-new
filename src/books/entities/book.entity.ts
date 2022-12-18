@@ -29,6 +29,9 @@ export class Book {
     @JoinTable({ name: 'book_reader' })
     takenBy: Reader[];
 
-    @ManyToMany(() => Genre)
+    @ManyToMany(() => Genre, (genre) => genre.id, {
+        eager: true
+    })
+    @JoinTable({ name: 'book_genres_genre'})
     genres: Genre[]
 }

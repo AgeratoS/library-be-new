@@ -12,12 +12,16 @@ export class BooksService {
   constructor(
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
-    @Inject(GenresService)
-    private genreService: GenresService
-  ) {}
+  ) { }
 
-  create(createBookDto: CreateBookDto) {
-    return 'This action adds a new book';
+  async create(createBookDto: CreateBookDto) {
+    const book = createBookDto;
+    try {
+      await this.bookRepository.save(book);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 
   findAll(): Promise<Book[]> {
@@ -28,11 +32,31 @@ export class BooksService {
     return this.bookRepository.findOneBy({ id });
   }
 
-  update(id: number, updateBookDto: UpdateBookDto) {
-    return `This action updates a #${id} book`;
+  async update(id: number, updateBookDto: UpdateBookDto) {
+    try {
+      const book = await this.bookRepository.findOneBy({ id });
+      book.author = updateBookDto.author;
+      book.genres = updateBookDto.genres;
+      book.isbn = updateBookDto.isbn;
+      book.publisher = updateBookDto.publisher;
+      book.shortAnnotation = updateBookDto.shortAnnotation;
+      book.title = updateBookDto.title;
+      book.year = updateBookDto.year;
+      await this.bookRepository.save(book);
+      return true;
+    } catch (e) {
+      console.error(e.message);
+      return false;
+    }
   }
 
-  async remove(id: number): Promise<void> {
-    await this.bookRepository.delete(id);
+  async remove(id: number): Promise<boolean> {
+    try {
+      const book = await this.bookRepository.findOneBy({ id });
+      await this.bookRepository.remove(book);
+      return true;
+    } catch (e) {
+      return false;
+    }
   }
 }

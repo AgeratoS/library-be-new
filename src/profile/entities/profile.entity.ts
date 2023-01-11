@@ -10,13 +10,15 @@ export class Profile {
     @Column()
     email: string;
 
-    @Column({ })
+    @Column({})
     password: string;
 
     @ManyToMany(() => Role)
     @JoinTable()
     roles: Role[];
 
-    @OneToMany(() => Reader, (reader) => reader.profile)
+    @OneToMany(() => Reader, (reader) => reader.profile, {
+        eager: true
+    })
     readers: Reader[]
 }

@@ -12,10 +12,14 @@ export class ProfileService {
   constructor(
     @InjectRepository(Profile)
     private profileRepository: Repository<Profile>
-  ) {}
+  ) { }
 
   async create(createProfileDto: CreateProfileDto) {
-    const exists = await this.profileRepository.findBy(createProfileDto);
+    const exists = await this.profileRepository.findBy({
+      email: createProfileDto.email,
+      password: createProfileDto.password
+    });
+
     if (exists.length > 0) {
       throw new HttpException('Пользователь уже существует', HttpStatus.NOT_ACCEPTABLE);
     }
@@ -34,17 +38,26 @@ export class ProfileService {
     return this.profileRepository.findOneBy(findProfileDto)
   }
 
-  update(id: number, updateProfileDto: UpdateProfileDto) {
-    return `This action updates a #${id} profile`;
+  async update(id: number, updateProfileDto: UpdateProfileDto) {
+    const exists = await this.profileRepository.findOneBy({ id });
+
+    if (exists) {
+      exists.email = updateProfileDto.email;
+      exists.password = updateProfileDto.password;
+      exists.roles = [updateProfileDto.role];
+      await this.profileRepository.save(exists);
+      return true;
+    }
+    return false;
   }
 
   async remove(id: number) {
     const profile = await this.profileRepository.findOneByOrFail({ id });
 
     if (profile) {
-      const removed = await this.profileRepository.remove([profile]);
-      return removed;
+      await this.profileRepository.remove([profile]);
+      return true;
     }
-    return [];
+    return false;
   }
 }

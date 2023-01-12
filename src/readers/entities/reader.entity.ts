@@ -27,7 +27,7 @@ export class Reader {
     age: number;
 
     @ManyToMany(() => Book, (book) => book.id, {
-        eager: true
+        eager: true,
     })
     @JoinTable({ name: 'book_reader' })
     books: Book[];

@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BooksService } from 'src/books/books.service';
 import { Book } from 'src/books/entities/book.entity';
 import { Repository } from 'typeorm';
 import { CreateReaderDto } from './dto/create-reader.dto';
@@ -12,9 +13,9 @@ export class ReadersService {
   constructor(
     @InjectRepository(Reader)
     private readerRepository: Repository<Reader>,
-    // @Inject(ProfileService)
-    // private profileService: ProfileService
-  ) {}
+    @Inject(BooksService)
+    private bookService: BooksService
+  ) { }
 
   create(createReaderDto: CreateReaderDto) {
     return this.readerRepository.create(createReaderDto);
@@ -26,7 +27,21 @@ export class ReadersService {
 
   // TODO: Добить привязку профиля
   linkToProfile() {
-      
+
+  }
+
+  async linkBook(readerId: number, bookId: number): Promise<boolean> {
+    const reader = await this.readerRepository.findOneBy({ id: readerId });
+
+    if (reader) {
+      const book = await this.bookService.findOne(bookId);
+      if (book) {
+        reader.books = [...reader.books, book];
+        await this.readerRepository.save(reader);
+        return true;
+      }
+    }
+    return false;
   }
 
   async getBooks(id: number): Promise<Book[]> {
@@ -35,12 +50,25 @@ export class ReadersService {
     if (!reader) {
       throw new HttpException('Нет читателя в запросе', HttpStatus.BAD_REQUEST);
     }
-    
+
     return reader.books;
   }
 
   findOne(id: number) {
     return this.readerRepository.findOneBy({ id });
+  }
+
+  async removeBook(readerId: number, bookId: number) {
+    const reader = await this.readerRepository.findOneBy({ id: readerId });
+    if (reader) {
+      console.log("before: ", reader);
+      reader.books = reader.books.filter((book) => book.id !== bookId);
+      console.log("after: ", reader);
+
+      await this.readerRepository.save(reader);
+      return true;
+    }
+    return false;
   }
 
   async update(id: number, updateReaderDto: UpdateReaderDto) {

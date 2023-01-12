@@ -27,6 +27,11 @@ export class ReadersController {
     return this.readersService.findOne(+id);
   }
 
+  @Post(':readerId/book/:bookId/rent')
+  linkBook(@Param('readerId') readerId: string, @Param('bookId') bookId: string) {
+    return this.readersService.linkBook(+readerId, +bookId);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateReaderDto: UpdateReaderDto) {
     return this.readersService.update(+id, updateReaderDto);
@@ -35,5 +40,10 @@ export class ReadersController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.readersService.remove(+id);
+  }
+
+  @Delete(':readerId/book/:bookId/unlink')
+  removeBook(@Param('readerId') readerId: string, @Param('bookId') bookId: string) {
+    return this.readersService.removeBook(+readerId, +bookId);
   }
 }

@@ -2,6 +2,9 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BooksService } from 'src/books/books.service';
 import { Book } from 'src/books/entities/book.entity';
+import { CreateProfileDto } from 'src/profile/dto/create-profile.dto';
+import { FindProfileDto } from 'src/profile/dto/find-profile.dto';
+import { ProfileService } from 'src/profile/profile.service';
 import { Repository } from 'typeorm';
 import { CreateReaderDto } from './dto/create-reader.dto';
 import { UpdateReaderDto } from './dto/update-reader.dto';
@@ -14,7 +17,9 @@ export class ReadersService {
     @InjectRepository(Reader)
     private readerRepository: Repository<Reader>,
     @Inject(BooksService)
-    private bookService: BooksService
+    private bookService: BooksService,
+    @Inject(ProfileService)
+    private profileService: ProfileService
   ) { }
 
   create(createReaderDto: CreateReaderDto) {
@@ -25,9 +30,18 @@ export class ReadersService {
     return this.readerRepository.find();
   }
 
-  // TODO: Добить привязку профиля
-  linkToProfile() {
+  async linkToProfile(profile: FindProfileDto, createReaderDto: CreateReaderDto) {
+    try {
+      const newProfile = await this.profileService.findByCredentials(profile);
+      const newReader = this.readerRepository.create(createReaderDto);
 
+      newReader.profile = newProfile;
+      await this.readerRepository.save(newReader);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   }
 
   async linkBook(readerId: number, bookId: number): Promise<boolean> {

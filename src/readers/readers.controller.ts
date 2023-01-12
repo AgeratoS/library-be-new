@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { ReadersService } from './readers.service';
 import { CreateReaderDto } from './dto/create-reader.dto';
 import { UpdateReaderDto } from './dto/update-reader.dto';
+import { CreateProfileDto } from 'src/profile/dto/create-profile.dto';
 
 @Controller('readers')
 export class ReadersController {
@@ -25,6 +26,11 @@ export class ReadersController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.readersService.findOne(+id);
+  }
+
+  @Post('linkReaderToProfile')
+  linkReaderToProfile(@Body() data: {reader: CreateReaderDto, profile: CreateProfileDto}) {
+    return this.readersService.linkToProfile(data.profile, data.reader);
   }
 
   @Post(':readerId/book/:bookId/rent')

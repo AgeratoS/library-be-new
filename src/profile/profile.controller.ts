@@ -18,7 +18,6 @@ export class ProfileController {
     return this.profileService.findAll();
   }
 
-  // TODO: Придумать, как добавить сюда токен
   @Get('findProfile')
   async findByCredentials(@Query('email') email, @Query('password') password) {
     const findProfileDto = new FindProfileDto(email, password);
@@ -27,7 +26,8 @@ export class ProfileController {
 
     if (result !== null) {
       return ({
-        token: 'tokenString'
+        token: 'tokenString',
+        profile: result
       })
     }
 
